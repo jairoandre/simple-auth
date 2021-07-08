@@ -25,6 +25,7 @@ func FindAllUsers() ([]*User, error) {
 	return users, nil
 }
 
-func FindByEmail() (email string) (*User, error) {
-	
+func FindByEmail(email string) (*User, error) {
+	user := User{}
+	return &user, nil
 }
