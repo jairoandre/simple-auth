@@ -24,3 +24,7 @@ func InsertUser(user *User) (*User, error) {
 func FindAllUsers() ([]*User, error) {
 	return users, nil
 }
+
+func FindByEmail() (email string) (*User, error) {
+	
+}

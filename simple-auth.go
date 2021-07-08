@@ -1,40 +1,34 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/jairoandre/simple-auth/model"
 )
 
-func postUser(w http.ResponseWriter, r *http.Request) {
-	reqBody, _ := ioutil.ReadAll(r.Body)
+func postUser(c *gin.Context) {
 	var user model.User
-	json.Unmarshal(reqBody, &user)
+	if err := c.ShouldBind(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	user = addUser(user)
-	json.NewEncoder(w).Encode(user)
+	c.JSON(200, user)
 }
 
-func getUsers(w http.ResponseWriter, r *http.Request) {
+func getUsers(c *gin.Context) {
 	users := findAllUsers()
-	json.NewEncoder(w).Encode(users)
-}
-
-func home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Home")
+	c.JSON(200, users)
 }
 
 func server() {
-	fmt.Println("Starting at port 8080")
-	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", home)
-	router.HandleFunc("/user", postUser).Methods("POST")
-	router.HandleFunc("/user", getUsers).Methods("GET")
-	router.Handle("/redirect", http.RedirectHandler("https://github.com/jairoandre", 307))
-	log.Fatal(http.ListenAndServe("localhost:8080", router))
+	r := gin.Default()
+	r.POST("/user", postUser)
+	r.GET("/user", getUsers)
+	r.GET("/ping", func (c *gin.Context){
+		c.JSON(200, gin.H{"message": "pong",})
+	})
+	r.Run()
 }
 
 func main() {
